@@ -15,11 +15,13 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # Nova etapa que instala o Android NDK automaticamente
+      # ETAPA CORRIGIDA: Nova ferramenta especializada e estável para baixar o NDK r25b (equivalente à 25.2)
       - name: Setup Android NDK
-        uses: android-actions/setup-android@v3
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
         with:
-          ndk-version: '25.2.9519653' # Versão padrão estável compatível com a maioria dos projetos QEMU
+          ndk-version: r25b
+          link-to-sdk: true
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -27,12 +29,13 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew assembleDebug
         env:
-          ANDROID_NDK_HOME: ${{ steps.setup-android.outputs.ndk-path }}
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Vectras-v7a-Debug-APK
           path: app/build/outputs/apk/debug/*.apk
+
 
 
