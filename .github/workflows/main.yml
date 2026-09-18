@@ -1,12 +1,13 @@
 name: Gerar APK Vectras
 on:
-  workflow_dispatch: # Permite que você ative a compilação manualmente
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -14,15 +15,24 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      # Nova etapa que instala o Android NDK automaticamente
+      - name: Setup Android NDK
+        uses: android-actions/setup-android@v3
+        with:
+          ndk-version: '25.2.9519653' # Versão padrão estável compatível com a maioria dos projetos QEMU
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build with Gradle
         run: ./gradlew assembleDebug
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-android.outputs.ndk-path }}
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Vectras-v7a-Debug-APK
           path: app/build/outputs/apk/debug/*.apk
+
 
